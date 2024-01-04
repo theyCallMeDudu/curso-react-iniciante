@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Form.css';
 import axios from 'axios';
+import useApi from '../../utils/useApi';
 
 const initialValue = {
     title: '',
@@ -13,15 +14,32 @@ const initialValue = {
 const PromotionForm = ({ id }) => {
     const [values, setValues] = useState(id ? null : initialValue);
     const navigate = useNavigate();
+    const [load, loadInfo] = useApi({
+        url: `http://localhost:5000/promotions/${id}`,
+        // url: `/promotions/${id}`,
+        method: 'GET',
+        onCompleted: (response) => {
+            setValues(response.data);
+        }
+    });
+
+    const [save, saveInfo] = useApi({
+        url: id ? `http://localhost:5000/promotions/${id}` : 'http://localhost:5000/promotions',
+        method: id ? 'put' : 'post',
+        data: values,
+        onCompleted: (response) => {
+            console.log(response);
+            if (!response.error) {
+                navigate('/');
+            }
+        }
+    });
 
     useEffect(() => {
         if (id) {
-            axios.get(`http://localhost:5000/promotions/${id}`)
-                .then((response) => {
-                    setValues(response.data);
-            });
+            load();
         }
-    }, []);
+    }, [id]);
 
     function onChange(event) {
         const { name, value } = event.target;
@@ -31,13 +49,7 @@ const PromotionForm = ({ id }) => {
 
     function onSubmit(event) {
         event.preventDefault();
-
-        const method = id ? 'put' : 'post';
-
-        axios[method](`http://localhost:5000/promotions${id ? `/${id}` : ''}`, values)
-            .then((response) => {
-                navigate('/');
-            })
+        save();
     }
 
     return (
@@ -50,6 +62,7 @@ const PromotionForm = ({ id }) => {
                     <div>Carregando...</div>
                 ) : (
                     <form onSubmit={onSubmit}>
+                        {saveInfo.loading && <span>Salvando dados...</span>}
                         <div className='promotion-form__group'>
                             <label htmlFor='title'>Título</label>
                             <input id='title' name='title' type='text' onChange={onChange} value={values.title} />
