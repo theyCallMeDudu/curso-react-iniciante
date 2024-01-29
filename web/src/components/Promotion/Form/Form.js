@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Form.css';
-import axios from 'axios';
 import useApi from '../../utils/useApi';
 
 const initialValue = {
@@ -15,8 +14,8 @@ const PromotionForm = ({ id }) => {
     const [values, setValues] = useState(id ? null : initialValue);
     const navigate = useNavigate();
     const [load, loadInfo] = useApi({
-        url: `http://localhost:5000/promotions/${id}`,
-        // url: `/promotions/${id}`,
+        // url: `http://localhost:5000/promotions/${id}`,
+        url: `/promotions/${id}`,
         method: 'GET',
         onCompleted: (response) => {
             setValues(response.data);
@@ -39,6 +38,7 @@ const PromotionForm = ({ id }) => {
         if (id) {
             load();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     function onChange(event) {
