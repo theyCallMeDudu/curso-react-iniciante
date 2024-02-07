@@ -36,11 +36,20 @@ const PromotionModal = ({ promotionId, onClickClose }) => {
                 }
             });
             setComment('');
-            load();
-        } catch (error) {
+            load({ quietly: true });
+        } catch (error) {}
+    }
 
-        }
-        
+    async function sendAnswer(text, parentId) {
+        await sendComment({
+            data: {
+                userId: 1,
+                promotionId,
+                comment: text,
+                parentId
+            },
+        });
+        load({ quietly: true });
     }
 
     return (
@@ -52,12 +61,16 @@ const PromotionModal = ({ promotionId, onClickClose }) => {
                     placeholder="Comentar..." 
                     onChange={(evento) => setComment(evento.target.value)} 
                     value={comment} 
+                    disabled={sendCommentInfo.loading}
                 />
                 <button type="submit">
                     {sendCommentInfo.loading ? 'Enviando...' : 'Enviar'}
                 </button>
             </form>
-            <PromotionModalCommentsTree comments={loadInfo.data} />
+            <PromotionModalCommentsTree 
+                comments={loadInfo.data} 
+                sendComment={sendAnswer}
+            />
         </UIModal>
     );
 }
